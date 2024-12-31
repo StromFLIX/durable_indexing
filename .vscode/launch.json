@@ -8,7 +8,7 @@
       "connect": {
         "port": 7071
       },
-      "preLaunchTask": "func: host start"
+      "preLaunchTask": "func: host start",
     }
   ]
 }
