@@ -1,0 +1,15 @@
+name: blob-data-sharing
+metadata:
+  template: blob-data-sharing@0.0.1-beta
+services:
+  blob-sharing-func:
+    project: ./src
+    language: python
+    host: function
+hooks:
+  postdeploy:
+    posix:
+      shell: sh
+      run: ./scripts/postdeploy.sh
+      interactive: true
+      continueOnError: false
