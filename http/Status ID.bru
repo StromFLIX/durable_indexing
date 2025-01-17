@@ -1,0 +1,21 @@
+meta {
+  name: Status ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:7071/api/status/:id?show_history=True&show_history_output=True&show_input=True
+  body: none
+  auth: none
+}
+
+params:query {
+  show_history: True
+  show_history_output: True
+  show_input: True
+}
+
+params:path {
+  id: 256ae30e1edd485083f497e3661589df
+}

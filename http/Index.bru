@@ -1,0 +1,17 @@
+meta {
+  name: Index
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:7071/api/index
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "prefix_list": [""]
+  }
+}
