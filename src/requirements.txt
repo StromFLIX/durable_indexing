@@ -3,5 +3,13 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
+azure-functions-durable
 azure-identity
 azure-storage-blob  
+azure-identity
+debugpy
+azure-ai-documentintelligence==1.0.0b4
+chonkie
+numpy
+openai
+azure-search-documents==11.6.0b6

@@ -4,11 +4,10 @@
     {
       "type": "func",
       "label": "func: host start",
-      "command": "host start --python",
+      "command": "host start --python --debug",
       "problemMatcher": "$func-python-watch",
       "isBackground": true,
       "dependsOn": "pip install (functions)",
-      // Ensure everything runs in src/
       "options": {
         "cwd": "${workspaceFolder}/src"
       }

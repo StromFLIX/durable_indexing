@@ -29,6 +29,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-05-01' = {
             {
               service: 'Microsoft.Storage'
             }
+            {
+              service: 'Microsoft.CognitiveServices'
+            }
           ]
         }
       }

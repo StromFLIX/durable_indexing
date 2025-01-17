@@ -45,11 +45,6 @@ var storages = [
     storageAccountName: '${abbrs.storageStorageAccounts}source${resourceToken}'
     containerNames: [functionContainerName, 'source']
   }
-  {
-    name: 'targetStorage'
-    storageAccountName: '${abbrs.storageStorageAccounts}target${resourceToken}'
-    containerNames: ['target']
-  }
 ]
 
 module storage 'core/storage/storage-account.bicep' = [
@@ -66,14 +61,49 @@ module storage 'core/storage/storage-account.bicep' = [
   }
 ]
 
+module documentIntelligence 'core/cognitive_services/document_intelligence.bicep' = {
+  name: 'documentIntelligence'
+  scope: resourceGroup
+  params: {
+    name: '${abbrs.cognitiveServicesAccounts}doc-int-${resourceToken}'
+    location: 'westeurope'
+    tags: tags
+    integrationSubnetId: vnet.outputs.integrationSubnetId
+    sourceStorageAccountName: storage[0].outputs.storageAccountName
+  }
+}
+
+module openAI 'core/cognitive_services/openai.bicep' = {
+  name: 'openAI'
+  scope: resourceGroup
+  params: {
+    name: '${abbrs.cognitiveServicesAccounts}ai-${resourceToken}'
+    location: 'swedencentral'
+    tags: tags
+    integrationSubnetId: vnet.outputs.integrationSubnetId
+  }
+}
+
+module searchService 'core/search/search-service.bicep' = {
+  name: 'searchService'
+  scope: resourceGroup
+  params: {
+    name: '${abbrs.searchSearchServices}ai-${resourceToken}'
+    location: location
+    tags: tags
+    openAIName: openAI.outputs.name
+  }
+}
+
 module flexFunction 'core/host/function.bicep' = {
   name: 'functionapp'
   scope: resourceGroup
   params: {
     location: location
     tags: tags
+    openAIName: openAI.outputs.name
+    documentIntelligenceName: documentIntelligence.outputs.name
     sourceStorageAccountName: storage[0].outputs.storageAccountName
-    targetStorageAccountName: storage[1].outputs.storageAccountName
     FunctionPlanName: '${abbrs.webServerFarms}${resourceToken}'
     functionAppName: functionAppName
     identityId: userAssignedIdentity.outputs.identityId
@@ -96,8 +126,10 @@ module eventgrid 'core/integration/eventgrid.bicep' = {
 }
 
 output SOURCE_STORAGE_ACCOUNT_NAME string = storage[0].outputs.storageAccountName
-output TARGET_STORAGE_ACCOUNT_NAME string = storage[1].outputs.storageAccountName
 
 output RESOURCE_GROUP_NAME string = resourceGroup.name
 output SYSTEM_TOPIC_NAME string = eventgrid.outputs.systemTopicName
 output FUNCTION_APP_NAME string = functionAppName
+output DI_ENDPOINT string = documentIntelligence.outputs.endpoint
+output AZURE_OPENAI_ENDPOINT string = openAI.outputs.endpoint
+output SEARCH_SERVICE_ENDPOINT string = searchService.outputs.endpoint
