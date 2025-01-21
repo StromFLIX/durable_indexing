@@ -63,5 +63,7 @@ async def status_id(req: func.HttpRequest, client: DurableOrchestrationClient) -
 async def index_http(req: func.HttpRequest, client: DurableOrchestrationClient) -> func.HttpResponse:
     logging.info('Kick off indexing process.')
     input = req.get_json()
-    instance_id = await client.start_new(orchestration_function_name="index", client_input={"prefix_list": input['prefix_list']})
+    instance_id = await client.start_new(
+        orchestration_function_name="index", 
+        client_input={"prefix_list": input['prefix_list'], "index_name": input['index_name']})
     return func.HttpResponse(instance_id, status_code=200)
