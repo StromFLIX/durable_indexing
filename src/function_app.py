@@ -16,20 +16,20 @@ from activities.search import ensure_index_exists, add_documents
 @app.event_grid_trigger(arg_name='event')
 @app.durable_client_input(client_name="client")
 async def main(event: func.EventGridEvent, client: DurableOrchestrationClient):
-    result = json.dumps({
-        'id': event.id,
-        'data': event.get_json(),
-        'topic': event.topic,
-        'subject': event.subject,
-        'event_type': event.event_type,
-    })
-
-    logging.info(f'Python EventGrid trigger processed an event: {result}')
-
-    instance_id = await client.start_new("index")
+    if event.get_json()["api"] != "PutBlob":
+        logging.info("Event type is not BlobCreated. Skipping execution.")
+        return
     
+    path_in_container = extract_path(event)
+    logging.info(f'Python EventGrid trigger processed a BlobCreated event. Path: {path_in_container}')
+
+    instance_id = await client.start_new("index", client_input={"prefix_list": [path_in_container]})
     logging.info(f'Started indexing with id: {instance_id}')
-    
+
+def extract_path(event: func.EventGridEvent):
+    subject = event.subject
+    path_in_container = subject.split("/blobs/", 1)[-1]
+    return path_in_container
 
 @app.function_name(name='status')
 @app.route(route="status", methods=[func.HttpMethod.GET])

@@ -10,9 +10,7 @@ def index(context: DurableOrchestrationContext):
     continuation_token = None
     array_position = 0
     container_name = "source"
-    if(os.environ.get("SEARCH_INDEX_NAME") is None and "index_name" not in input):
-        index_name = "default-index"
-    index_name = input["index_name"] if "index_name" in input else os.environ.get("SEARCH_INDEX_NAME")
+    index_name = input.get("index_name") or os.environ.get("SEARCH_INDEX_NAME", "default-index")
     blob_amount_parallel = int(os.environ.get("BLOB_AMOUNT_PARALLEL", "20"))
     # For every item in iterable create a sub orchestrator ( should be every file in the blob storage)
     while True:
