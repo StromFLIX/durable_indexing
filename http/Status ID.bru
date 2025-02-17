@@ -5,17 +5,17 @@ meta {
 }
 
 get {
-  url: http://localhost:7071/api/status/:id?show_history=True&show_input=True&show_history_output=True
+  url: http://localhost:7071/api/status/:id?show_history=True
   body: none
   auth: none
 }
 
 params:query {
   show_history: True
-  show_input: True
-  show_history_output: True
+  ~show_input: True
+  ~show_history_output: True
 }
 
 params:path {
-  id: b69a9703-d528-5ca9-a26d-2436d9c233f7
+  id: ae28b59713564aa787954b84ea6bdd7f
 }

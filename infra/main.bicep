@@ -111,6 +111,10 @@ module flexFunction 'core/host/function.bicep' = {
     principalID: userAssignedIdentity.outputs.identityPrincipalId
     functionContainerName: functionContainerName
     integrationSubnetId: vnet.outputs.integrationSubnetId
+    searchServiceEndpoint: searchService.outputs.endpoint
+    diEndpoint: documentIntelligence.outputs.endpoint
+    openAIEndpoint: openAI.outputs.endpoint
+    searchServiceName: searchService.outputs.name
   }
 }
 

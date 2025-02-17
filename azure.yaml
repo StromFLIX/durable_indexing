@@ -2,7 +2,7 @@ name: blob-data-sharing
 metadata:
   template: blob-data-sharing@0.0.1-beta
 services:
-  blob-sharing-func:
+  indexing-func:
     project: ./src
     language: python
     host: function

@@ -10,6 +10,10 @@ param functionContainerName string
 param integrationSubnetId string
 param documentIntelligenceName string
 param openAIName string
+param searchServiceEndpoint string
+param diEndpoint string
+param openAIEndpoint string
+param searchServiceName string
 
 resource sourceStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: sourceStorageAccountName
@@ -21,6 +25,10 @@ resource documentIntelligence 'Microsoft.CognitiveServices/accounts@2024-04-01-p
 
 resource openAI 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' existing = {
   name: openAIName
+}
+
+resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
+  name: searchServiceName
 }
 
 
@@ -101,6 +109,9 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
       AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
       AZURE_CLIENT_ID: identityClientId
       SOURCE_STORAGE_ACCOUNT_NAME: sourceStorageAccount.name
+      DI_ENDPOINT: diEndpoint
+      AZURE_OPENAI_ENDPOINT: openAIEndpoint
+      SEARCH_SERVICE_ENDPOINT: searchServiceEndpoint
     }
   }
 }
@@ -149,4 +160,29 @@ resource cognitiveServicesOAIUserRoleAssignment 'Microsoft.Authorization/roleAss
     principalType: 'ServicePrincipal'
   }
 }
+
+// Search Service Contributor
+resource searchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(searchService.id, principalID, '7ca78c08-252a-4471-8644-bb5ff32d4ba0')
+  scope: searchService
+  properties: {
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '7ca78c08-252a-4471-8644-bb5ff32d4ba0')
+    principalId: principalID
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Search Index Data Contributor
+resource searchIndexDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(searchService.id, principalID, '8ebe5a00-799e-43f5-93ac-243d3dce84a7')
+  scope: searchService
+  properties: {
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '8ebe5a00-799e-43f5-93ac-243d3dce84a7')
+    principalId: principalID
+    principalType: 'ServicePrincipal'
+  }
+}
+
+
+
 
