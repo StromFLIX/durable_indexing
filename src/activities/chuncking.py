@@ -1,13 +1,10 @@
 from application.app import app
-import os
-from azure.identity import DefaultAzureCredential
-from azure.ai.documentintelligence import DocumentIntelligenceClient
-from azure.ai.documentintelligence.models import AnalyzeDocumentRequest, AnalyzeResult
 from chonkie import SentenceChunker
+from typing import List, Dict
 
 @app.function_name(name="chunking")
 @app.activity_trigger(input_name="document")
-def chunking(document: dict) -> list[str]:
+def chunking(document: Dict) -> List[str]:
     chunker = SentenceChunker(
         tokenizer="gpt2",
         chunk_size=512,
@@ -31,7 +28,7 @@ def chunking(document: dict) -> list[str]:
         })
     return chunks_with_page_numbers
 
-def get_page_number(position: int, pages: list[str]) -> int:
+def get_page_number(position: int, pages: List[str]) -> int:
     position -= 1
     for page_number, page_content in enumerate(pages):
         if position < len(page_content):

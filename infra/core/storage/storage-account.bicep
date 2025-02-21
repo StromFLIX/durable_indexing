@@ -2,7 +2,6 @@ param location string = resourceGroup().location
 param tags object = {}
 param storageAccountName string
 param containerNames array
-param integrationSubnetId string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
@@ -20,17 +19,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     defaultToOAuthAuthentication: true
     minimumTlsVersion: 'TLS1_2'
     publicNetworkAccess: 'Enabled'
-    networkAcls: {
-      defaultAction: 'Deny'
-      bypass: 'AzureServices'
-      virtualNetworkRules: [
-        {
-          id: integrationSubnetId
-          action: 'Allow'
-          state: 'Succeeded'
-        }
-      ]
-    }
   }
 
   resource blobService 'blobServices' existing = {

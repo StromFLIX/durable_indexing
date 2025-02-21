@@ -7,13 +7,13 @@ param identityId string
 param identityClientId string
 param principalID string
 param functionContainerName string
-param integrationSubnetId string
 param documentIntelligenceName string
 param openAIName string
 param searchServiceEndpoint string
 param diEndpoint string
 param openAIEndpoint string
 param searchServiceName string
+param appInsightsName string
 
 resource sourceStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: sourceStorageAccountName
@@ -29,6 +29,10 @@ resource openAI 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' existi
 
 resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
   name: searchServiceName
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: appInsightsName
 }
 
 
@@ -49,7 +53,7 @@ resource flexFunctionPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
-  tags: union(tags, { 'azd-service-name': 'blob-sharing-func' })
+  tags: union(tags, { 'azd-service-name': 'indexadillo-func' })
   kind: 'functionapp,linux'
   identity: {
     type: 'UserAssigned'
@@ -60,7 +64,6 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: flexFunctionPlan.id
     httpsOnly: true
-    virtualNetworkSubnetId: integrationSubnetId
     functionAppConfig: {
       deployment: {
         storage: {
@@ -87,16 +90,6 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
     name: 'web'
     properties: {
       publicNetworkAccess: 'Enabled'
-      ipSecurityRestrictionsDefaultAction: 'Deny'
-      ipSecurityRestrictions:[
-        {
-          ipAddress: 'AzureEventGrid'
-          action: 'Allow'
-          tag: 'ServiceTag'
-          priority: 300
-          name: 'Allow Azure Event Grid'
-        }
-      ]
     }
   }
 
@@ -108,6 +101,7 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
       AzureWebJobsStorage__credential : 'managedidentity'
       AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
       AZURE_CLIENT_ID: identityClientId
+      APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
       SOURCE_STORAGE_ACCOUNT_NAME: sourceStorageAccount.name
       DI_ENDPOINT: diEndpoint
       AZURE_OPENAI_ENDPOINT: openAIEndpoint
@@ -122,6 +116,39 @@ resource sourceStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@20
   scope: sourceStorageAccount
   properties: {
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+    principalId: principalID
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Storage Blob Data Contributor
+resource sourceStorageDataRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(sourceStorageAccount.id, principalID, 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+  scope: sourceStorageAccount
+  properties: {
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+    principalId: principalID
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Storage Queue Data Contributor
+resource sourceStorageQueueRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(sourceStorageAccount.id, principalID, '974c5e8b-45b9-4653-ba55-5f855dd0fb88')
+  scope: sourceStorageAccount
+  properties: {
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88')
+    principalId: principalID
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Storage Table Data Contributor
+resource sourceStorageTableRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(sourceStorageAccount.id, principalID, '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3')
+  scope: sourceStorageAccount
+  properties: {
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3')
     principalId: principalID
     principalType: 'ServicePrincipal'
   }

@@ -29,16 +29,6 @@ module userAssignedIdentity 'core/identity/user-assigned-identity.bicep' = {
   }
 }
 
-module vnet 'core/networking/vnet.bicep' = {
-  name: 'vnet'
-  scope: resourceGroup
-  params: {
-    location: location
-    tags: tags
-    vnetName: '${abbrs.networkVirtualNetworks}${resourceToken}'
-  }
-}
-
 var storages = [
   {
     name: 'sourceStorage'
@@ -56,7 +46,6 @@ module storage 'core/storage/storage-account.bicep' = [
       tags: tags
       storageAccountName: storage.storageAccountName
       containerNames: storage.containerNames
-      integrationSubnetId: vnet.outputs.integrationSubnetId
     }
   }
 ]
@@ -68,7 +57,6 @@ module documentIntelligence 'core/cognitive_services/document_intelligence.bicep
     name: '${abbrs.cognitiveServicesAccounts}doc-int-${resourceToken}'
     location: 'westeurope'
     tags: tags
-    integrationSubnetId: vnet.outputs.integrationSubnetId
     sourceStorageAccountName: storage[0].outputs.storageAccountName
   }
 }
@@ -80,7 +68,6 @@ module openAI 'core/cognitive_services/openai.bicep' = {
     name: '${abbrs.cognitiveServicesAccounts}ai-${resourceToken}'
     location: 'swedencentral'
     tags: tags
-    integrationSubnetId: vnet.outputs.integrationSubnetId
   }
 }
 
@@ -89,9 +76,19 @@ module searchService 'core/search/search-service.bicep' = {
   scope: resourceGroup
   params: {
     name: '${abbrs.searchSearchServices}ai-${resourceToken}'
-    location: location
+    location: 'switzerlandnorth'
     tags: tags
     openAIName: openAI.outputs.name
+  }
+}
+
+module appInsights 'core/application_insights/application_insights_service.bicep' = {
+  name: 'appInsights'
+  scope: resourceGroup
+  params: {
+    name: '${abbrs.insightsComponents}S${resourceToken}'
+    location: location
+    tags: tags
   }
 }
 
@@ -101,6 +98,7 @@ module flexFunction 'core/host/function.bicep' = {
   params: {
     location: location
     tags: tags
+    appInsightsName: appInsights.outputs.name
     openAIName: openAI.outputs.name
     documentIntelligenceName: documentIntelligence.outputs.name
     sourceStorageAccountName: storage[0].outputs.storageAccountName
@@ -110,7 +108,6 @@ module flexFunction 'core/host/function.bicep' = {
     identityClientId: userAssignedIdentity.outputs.identityClientId
     principalID: userAssignedIdentity.outputs.identityPrincipalId
     functionContainerName: functionContainerName
-    integrationSubnetId: vnet.outputs.integrationSubnetId
     searchServiceEndpoint: searchService.outputs.endpoint
     diEndpoint: documentIntelligence.outputs.endpoint
     openAIEndpoint: openAI.outputs.endpoint

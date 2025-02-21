@@ -4,8 +4,6 @@ param name string
 param location string = resourceGroup().location
 @description('Tags for the resource.')
 param tags object = {}
-@description('Subnet Id of the one.')
-param integrationSubnetId string
 @description('Whether to enable public network access. Defaults to Enabled.')
 @allowed([
   'Enabled'
@@ -23,16 +21,6 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.7.2' = {
     kind: 'OpenAI'
     publicNetworkAccess: publicNetworkAccess
     customSubDomainName: name
-    networkAcls: {
-      defaultAction: 'Deny'
-      virtualNetworkRules: [
-        {
-          id: integrationSubnetId
-          action: 'Allow'
-          state: 'Succeeded'
-        }
-      ]
-    }
     sku: 'S0'
     deployments: [
       {
@@ -44,7 +32,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.7.2' = {
         }
         sku: {
           name: 'Standard'
-          capacity: 120
+          capacity: 100
         }
       }
     ]

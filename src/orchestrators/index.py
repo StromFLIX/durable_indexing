@@ -1,4 +1,4 @@
-from azure.durable_functions import DurableOrchestrationContext
+from azure.durable_functions import DurableOrchestrationContext, RetryOptions
 from application.app import app
 import os
 
@@ -9,9 +9,17 @@ def index(context: DurableOrchestrationContext):
     input = context.get_input()
     continuation_token = None
     array_position = 0
-    container_name = "source"
-    index_name = input.get("index_name") or os.environ.get("SEARCH_INDEX_NAME", "default-index")
-    blob_amount_parallel = int(os.environ.get("BLOB_AMOUNT_PARALLEL", "20"))
+    container_name = input.get("defaults").get("BLOB_CONTAINER_NAME")
+    if container_name is None:
+        raise ValueError("BLOB_CONTAINER_NAME is not set")
+    index_name = input.get("index_name") or input.get("defaults").get("SEARCH_INDEX_NAME")
+    if index_name is None:
+        raise ValueError("SEARCH_INDEX_NAME is not set")
+    blob_amount_parallel = input.get("defaults").get("BLOB_AMOUNT_PARALLEL")
+    if blob_amount_parallel is None:
+        raise ValueError("BLOB_AMOUNT_PARALLEL is not set")
+    
+    yield context.call_activity(name="ensure_index_exists", input_=index_name)
     # For every item in iterable create a sub orchestrator ( should be every file in the blob storage)
     while True:
         prefix_list = [""] if "prefix_list" not in input else input["prefix_list"] 
@@ -26,10 +34,9 @@ def index(context: DurableOrchestrationContext):
             break
         continuation_token = blob_list_result["continuation_token"]
         array_position = blob_list_result["prefix_list_offset"]
-        yield context.call_activity(name="ensure_index_exists", input_=index_name)
         task_list = []
         for blob_name in blob_list_result["blob_names"]:
-            task_list.append(context.call_sub_orchestrator(name="index_document", input_={"blob_url": blob_name, "index_name": index_name}, instance_id=context.new_uuid()))
+            task_list.append(context.call_sub_orchestrator(name="index_document", input_={"blob_url": blob_name, "index_name": index_name}))
         yield context.task_all(task_list)
     
 
@@ -39,5 +46,6 @@ def index_document(context: DurableOrchestrationContext):
     input = context.get_input()
     document = yield context.call_activity("document_cracking", input["blob_url"])
     chunks = yield context.call_activity("chunking", document)
-    chunks_with_embeddings = yield context.call_activity("embedding", chunks)
+    embeddings_retry_options = RetryOptions(first_retry_interval_in_milliseconds=1000, max_number_of_attempts=3)
+    chunks_with_embeddings = yield context.call_activity_with_retry("embedding", embeddings_retry_options, chunks)
     yield context.call_activity("add_documents", {"chunks": chunks_with_embeddings, "index_name": input["index_name"]})

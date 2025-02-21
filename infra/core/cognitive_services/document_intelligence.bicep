@@ -4,8 +4,6 @@ param name string
 param location string = resourceGroup().location
 @description('Tags for the resource.')
 param tags object = {}
-@description('Subnet Id of the one.')
-param integrationSubnetId string
 
 param sourceStorageAccountName string
 
@@ -38,16 +36,6 @@ resource documentIntelligence 'Microsoft.CognitiveServices/accounts@2024-04-01-p
     customSubDomainName: toLower(name)
     disableLocalAuth: disableLocalAuth
     publicNetworkAccess: publicNetworkAccess
-    networkAcls: {
-      defaultAction: 'Deny'
-      virtualNetworkRules: [
-        {
-          id: integrationSubnetId
-          action: 'Allow'
-          state: 'Succeeded'
-        }
-      ]
-    }
   }
   sku: sku
 }

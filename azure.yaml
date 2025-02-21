@@ -1,8 +1,8 @@
-name: blob-data-sharing
+name: indexadillo
 metadata:
-  template: blob-data-sharing@0.0.1-beta
+  template: indexadillo@0.0.1-beta
 services:
-  indexing-func:
+  indexadillo-func:
     project: ./src
     language: python
     host: function

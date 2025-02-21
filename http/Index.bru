@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:7071/api/index
+  url: {{host}}/api/index
   body: json
   auth: none
 }
@@ -13,6 +13,6 @@ post {
 body:json {
   {
     "prefix_list": [""],
-    "index_name": "other-index"
+    "index_name": "index-test-local-4"
   }
 }

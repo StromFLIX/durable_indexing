@@ -14,8 +14,7 @@ Durable Indexing helps you push data to Azure AI Search in a scalable, observabl
 - **“Chonkie” for Chunking:** Break down big files into smaller pieces for easier processing.  
 - **OpenAI Text-003-Large Embeddings:** Transform your text into embeddings for full-text AI search.  
 - **Azure AI Search Upload:** All neatly sent to your search index.  
-- **Scalability:** Process documents in parallel without losing track, thanks to continuation tokens and Durable Functions’ built-in retries.  
-- **VNet Protection:** Everything is contained within a protected network for extra safety.  
+- **Scalability:** Process documents in parallel without losing track, thanks to continuation tokens and Durable Functions’ built-in retries.
 
 ## Getting Started
 

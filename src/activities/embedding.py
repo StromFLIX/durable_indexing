@@ -2,10 +2,11 @@ from application.app import app
 import os
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from openai import AzureOpenAI
+from typing import List, Dict
 
 @app.function_name(name="embedding")
 @app.activity_trigger(input_name="chunks")
-def embedding(chunks: list[dict]) -> list[dict]:
+def embedding(chunks: List[Dict]) -> List[Dict]:
     endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
     token_provider = get_bearer_token_provider(
         DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"

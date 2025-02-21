@@ -28,6 +28,7 @@ from azure.search.documents.indexes.aio import SearchIndexClient
 from application.app import app
 from azure.identity import DefaultAzureCredential
 from urllib.parse import urlsplit
+from typing import List, Dict
 
 class AzureOpenAIEmbeddingConfig():
     """
@@ -213,7 +214,7 @@ class SearchManager:
 
 @app.function_name(name="add_documents")
 @app.activity_trigger(input_name="documents")
-async def add_documents(documents: dict) -> list[str]:
+async def add_documents(documents: dict) -> List[str]:
     searchManager = SearchManager(
         SearchInfo(
             endpoint=os.getenv("SEARCH_SERVICE_ENDPOINT"),
@@ -230,7 +231,7 @@ async def add_documents(documents: dict) -> list[str]:
     
 @app.function_name(name="ensure_index_exists")
 @app.activity_trigger(input_name="name")
-async def ensure_index_exists(name: str) -> list[str]:
+async def ensure_index_exists(name: str) -> List[str]:
     searchManager = SearchManager(
         SearchInfo(
             endpoint=os.getenv("SEARCH_SERVICE_ENDPOINT"),
