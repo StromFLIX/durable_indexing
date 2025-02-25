@@ -6,6 +6,14 @@
   },
   "extensions": {
     "durableTask": {
+      "hubName": "indexadillo-hub",
+      "useGracefulShutdown": true,
+      "storageProvider": {
+        "type" : "Netherite",
+        "PartitionCount": "12",  
+        "StorageConnectionName": "TaskHubConnection",
+        "EventHubsConnectionName": "EventHubsConnection"
+      },
       "tracing": {
         "DistributedTracingEnabled": true,
         "Version": "V2"

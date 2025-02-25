@@ -82,11 +82,19 @@ module searchService 'core/search/search-service.bicep' = {
   }
 }
 
+module eventHub 'core/eventhub/eventhub.bicep' = {
+  name: 'eventHub'
+  scope: resourceGroup
+  params: {
+    eventHubNamespaceName: '${abbrs.eventHubNamespaces}${resourceToken}'
+  }
+}
+
 module appInsights 'core/application_insights/application_insights_service.bicep' = {
   name: 'appInsights'
   scope: resourceGroup
   params: {
-    name: '${abbrs.insightsComponents}S${resourceToken}'
+    name: '${abbrs.insightsComponents}${resourceToken}'
     location: location
     tags: tags
   }
@@ -112,6 +120,8 @@ module flexFunction 'core/host/function.bicep' = {
     diEndpoint: documentIntelligence.outputs.endpoint
     openAIEndpoint: openAI.outputs.endpoint
     searchServiceName: searchService.outputs.name
+    eventHubNamespaceName: eventHub.outputs.eventHubNamespaceName
+    eventHubNamespaceAuthRuleName: eventHub.outputs.eventHubNamespaceAuthRuleName
   }
 }
 

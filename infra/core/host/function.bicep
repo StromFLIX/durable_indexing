@@ -14,6 +14,8 @@ param diEndpoint string
 param openAIEndpoint string
 param searchServiceName string
 param appInsightsName string
+param eventHubNamespaceName string
+param eventHubNamespaceAuthRuleName string
 
 resource sourceStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
   name: sourceStorageAccountName
@@ -33,6 +35,10 @@ resource searchService 'Microsoft.Search/searchServices@2023-11-01' existing = {
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
+}
+
+resource eventHubNamespaceAuthRule 'Microsoft.EventHub/namespaces/authorizationRules@2024-01-01' existing = {
+  name: '${eventHubNamespaceName}/${eventHubNamespaceAuthRuleName}'
 }
 
 
@@ -78,6 +84,10 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
       scaleAndConcurrency: {
         maximumInstanceCount: 100
         instanceMemoryMB: 2048
+        alwaysReady: [
+          {instanceCount: 1, name: 'http'}
+          {instanceCount: 1, name: 'durable'}
+        ]
       }
       runtime: {
         name: 'python'
@@ -106,6 +116,8 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
       DI_ENDPOINT: diEndpoint
       AZURE_OPENAI_ENDPOINT: openAIEndpoint
       SEARCH_SERVICE_ENDPOINT: searchServiceEndpoint
+      EventHubsConnection: eventHubNamespaceAuthRule.listKeys().primaryConnectionString
+      TaskHubConnection: 'DefaultEndpointsProtocol=https;AccountName=${sourceStorageAccount.name};AccountKey=${sourceStorageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
     }
   }
 }
