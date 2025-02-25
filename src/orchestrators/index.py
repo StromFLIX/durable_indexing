@@ -36,7 +36,11 @@ def index(context: DurableOrchestrationContext):
         array_position = blob_list_result["prefix_list_offset"]
         task_list = []
         for blob_name in blob_list_result["blob_names"]:
-            task_list.append(context.call_sub_orchestrator(name="index_document", input_={"blob_url": blob_name, "index_name": index_name}))
+            document_retry_options = RetryOptions(first_retry_interval_in_milliseconds=60_000, max_number_of_attempts=3)
+            task_list.append(context.call_sub_orchestrator_with_retry(
+                name="index_document",
+                retry_options=document_retry_options,
+                input_={"blob_url": blob_name, "index_name": index_name}))
         yield context.task_all(task_list)
     
 
@@ -44,8 +48,8 @@ def index(context: DurableOrchestrationContext):
 @app.orchestration_trigger(context_name="context")
 def index_document(context: DurableOrchestrationContext):
     input = context.get_input()
-    document = yield context.call_activity("document_cracking", input["blob_url"])
+    service_retry_options = RetryOptions(first_retry_interval_in_milliseconds=3000, max_number_of_attempts=3)
+    document = yield context.call_activity_with_retry("document_cracking", service_retry_options, input["blob_url"])
     chunks = yield context.call_activity("chunking", document)
-    embeddings_retry_options = RetryOptions(first_retry_interval_in_milliseconds=1000, max_number_of_attempts=3)
-    chunks_with_embeddings = yield context.call_activity_with_retry("embedding", embeddings_retry_options, chunks)
-    yield context.call_activity("add_documents", {"chunks": chunks_with_embeddings, "index_name": input["index_name"]})
+    chunks_with_embeddings = yield context.call_activity_with_retry("embedding", service_retry_options, chunks)
+    yield context.call_activity_with_retry("add_documents",  service_retry_options,{"chunks": chunks_with_embeddings, "index_name": input["index_name"]})
