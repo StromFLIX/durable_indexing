@@ -22,10 +22,10 @@ defaults = {
 }
 
 
-@app.function_name(name='blob_sharing')
+@app.function_name(name='index_event_grid')
 @app.event_grid_trigger(arg_name='event')
 @app.durable_client_input(client_name="client")
-async def main(event: func.EventGridEvent, client: DurableOrchestrationClient):
+async def index_event_grid(event: func.EventGridEvent, client: DurableOrchestrationClient):
     if event.get_json()["api"] != "PutBlob":
         logging.info("Event type is not BlobCreated. Skipping execution.")
         return

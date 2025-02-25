@@ -33,7 +33,7 @@
             ]
         } 
     },
-    "postCreateCommand": "python3 -m venv .venv",
-    "postAttachCommand": ". .venv/bin/activate",
+    "postCreateCommand": "python3 -m venv src/.venv",
+    "postAttachCommand": ". src/.venv/bin/activate",
     "remoteUser": "vscode"
 }

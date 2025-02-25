@@ -36,7 +36,7 @@ if echo "$list_evensub" | jq -e 'length == 0' > /dev/null; then
         --name StorageBlobCreated \
         --resource-group $RESOURCE_GROUP_NAME \
         --system-topic-name $SYSTEM_TOPIC_NAME \
-        --endpoint "https://$FUNCTION_APP_NAME.azurewebsites.net/runtime/webhooks/EventGrid?functionName=blob_sharing&code=$code" \
+        --endpoint "https://$FUNCTION_APP_NAME.azurewebsites.net/runtime/webhooks/EventGrid?functionName=index_event_grid&code=$code" \
         --subject-begins-with "/blobServices/default/containers/source" \
         --included-event-types "Microsoft.Storage.BlobCreated"
 fi
