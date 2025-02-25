@@ -1,7 +1,6 @@
 # Indexadillo
-<div style="float: left; width: 200px; margin-right: 20px;">
-  <img src="assets/indexadillo.png" alt="Indexadillo Mascot" style="border-radius: 10px; width: 100%;">
-</div>
+
+![Indexadillo Mascot](assets/indexadillo.png|width=200)
 
 Durable Indexing helps you push data to Azure AI Search in a scalable, observable way. Instead of using a pull-based DSL
 approach (which can be tricky to debug and customize), this solution uses Azure Durable Functions to handle everything from
