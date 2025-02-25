@@ -1,6 +1,6 @@
-# Indexadillo
 <div align='center'>
 <img src="assets/indexadillo.png" alt="Indexadillo Mascot" width="200" >
+**Indexadillo**
 </div>
 
 ---
